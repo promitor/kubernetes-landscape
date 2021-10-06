@@ -1,0 +1,23 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+    - '.github/workflows/ci.yml'
+    - 'deploy/**'
+  
+name: CI
+jobs:
+  kubernetes_cluster:
+    name: Kubernetes Cluster
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout code
+    - uses: actions/checkout@main
+
+      # Lint Bicep file
+    - name: Bicep Build
+      uses: Azure/bicep-build-action@v1.0.0
+      with:
+        bicepFilePath: ./deploy/kubernetes-cluster.bicep
