@@ -1,0 +1,38 @@
+name: Deploy Kubernetes Cluster on Azure
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+    - 'deploy/**'
+    - '.github/workflows/deploy-kubernetes-on-azure.yml'
+
+jobs:
+  deploy_to_prod:
+      name: Deploy to Production
+      env:
+        AZURE_RESOURCEGROUP_NAME: "promitor-kubernetes-landscape"
+      environment:
+        name: Kubernetes Cluster
+      runs-on: ubuntu-latest
+      steps:
+        # Checkout code
+      - uses: actions/checkout@main
+        name: Checkout code
+
+          # Login to Azure
+      - uses: azure/login@v1
+        name: Login to Azure
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+        # Deploy Bicep file
+      - name: Deploy to Azure
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: ${{ env.AZURE_RESOURCEGROUP_NAME }}
+          template: ./deploy/kubernetes-cluster.bicep
+          deploymentName: kubernetes-cluster-run-${{ github.run_number }}
+          failOnStdErr: false
