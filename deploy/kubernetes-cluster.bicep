@@ -23,9 +23,6 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2020-11-01' = {
               name: 'aciDelegation'
               properties: {
                 serviceName: 'Microsoft.ContainerInstance/containerGroups'
-                actions: [
-                  'Microsoft.Network/virtualNetworks/subnets/action'
-                ]
               }
             }
           ]
@@ -97,10 +94,11 @@ resource kubernetesCluster 'Microsoft.ContainerService/managedClusters@2021-02-0
   ]
 }
 
+var NetworkContibutorRole = '4d97b98b-1d4f-4787-a291-c67834d212e7'
 resource clusterNetworkRole 'Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments@2018-09-01-preview' = {
   name: 'promitor-kubernetes-landscape-vnet/default/Microsoft.Authorization/cf092765-8352-4ee3-9944-7bd1550be619'
   properties: {
-    roleDefinitionId: '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7'
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', NetworkContibutorRole)
     principalId: kubernetesCluster.identity.principalId
     scope: resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'default')
   }
@@ -113,7 +111,7 @@ resource clusterNetworkRole 'Microsoft.Network/virtualNetworks/subnets/providers
 resource aciNetworkRole 'Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments@2018-09-01-preview' = {
   name: 'promitor-kubernetes-landscape-vnet/virtual-node-aci/Microsoft.Authorization/5835ffa3-9aec-441f-b0a9-967c4d23e6a1'
   properties: {
-    roleDefinitionId: '/subscriptions/${subscription().subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7'
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', NetworkContibutorRole)
     principalId: kubernetesCluster.properties.addonProfiles.aciConnectorLinux.identity.objectId
     scope: resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'virtual-node-aci')
   }
