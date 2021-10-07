@@ -1,4 +1,6 @@
 var location = resourceGroup().location
+var kubernetesClusterSubnetName = 'virtual-nodes'
+var virtualNodesSubnetName = 'virtual-nodes'
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2020-11-01' = {
   name: 'promitor-kubernetes-landscape-virtual-network'
@@ -7,14 +9,14 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2020-11-01' = {
   properties: {
     subnets: [
       {
-        name: 'default'
+        name: kubernetesClusterSubnetName
         id: '/subscriptions/63c590b6-4947-4898-92a3-cae91a31b5e4/resourceGroups/promitor-kubernetes-landscape/providers/Microsoft.Network/virtualNetworks/promitor-kubernetes-landscape-vnet/subnets/default'
         properties: {
           addressPrefix: '10.240.0.0/16'
         }
       }
       {
-        name: 'virtual-node-aci'
+        name: virtualNodesSubnetName
         id: '/subscriptions/63c590b6-4947-4898-92a3-cae91a31b5e4/resourceGroups/promitor-kubernetes-landscape/providers/Microsoft.Network/virtualNetworks/promitor-kubernetes-landscape-vnet/subnets/virtual-node-aci'
         properties: {
           addressPrefix: '10.241.0.0/16'
@@ -61,7 +63,7 @@ resource kubernetesCluster 'Microsoft.ContainerService/managedClusters@2021-02-0
         mode: 'System'
         maxPods: 110
         availabilityZones: []
-        vnetSubnetID: resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'default')
+        vnetSubnetID: resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, kubernetesClusterSubnetName)
       }
     ]
     networkProfile: {
@@ -84,7 +86,7 @@ resource kubernetesCluster 'Microsoft.ContainerService/managedClusters@2021-02-0
       aciConnectorLinux: {
         enabled: true
         config: {
-          SubnetName: 'virtual-node-aci'
+          SubnetName: virtualNodesSubnetName
         }
       }
     }
@@ -96,11 +98,11 @@ resource kubernetesCluster 'Microsoft.ContainerService/managedClusters@2021-02-0
 
 var NetworkContibutorRole = '4d97b98b-1d4f-4787-a291-c67834d212e7'
 resource clusterNetworkRole 'Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments@2018-09-01-preview' = {
-  name: 'promitor-kubernetes-landscape-vnet/default/Microsoft.Authorization/cf092765-8352-4ee3-9944-7bd1550be619'
+  name: guid(resourceGroup().id, kubernetesCluster.id, kubernetesClusterSubnetName, NetworkContibutorRole)
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', NetworkContibutorRole)
     principalId: kubernetesCluster.identity.principalId
-    scope: resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'default')
+    scope: resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, kubernetesClusterSubnetName)
   }
   dependsOn: [
     virtualNetwork
@@ -109,11 +111,11 @@ resource clusterNetworkRole 'Microsoft.Network/virtualNetworks/subnets/providers
 }
 
 resource aciNetworkRole 'Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments@2018-09-01-preview' = {
-  name: 'promitor-kubernetes-landscape-vnet/virtual-node-aci/Microsoft.Authorization/5835ffa3-9aec-441f-b0a9-967c4d23e6a1'
+  name: guid(resourceGroup().id, kubernetesCluster.id, virtualNodesSubnetName, NetworkContibutorRole)
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', NetworkContibutorRole)
     principalId: kubernetesCluster.properties.addonProfiles.aciConnectorLinux.identity.objectId
-    scope: resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'virtual-node-aci')
+    scope: resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, virtualNodesSubnetName)
   }
   dependsOn: [
     virtualNetwork
