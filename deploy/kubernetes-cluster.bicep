@@ -58,7 +58,6 @@ resource kubernetesCluster 'Microsoft.ContainerService/managedClusters@2021-02-0
         enableAutoScaling: false
         vmSize: 'Standard_B4ms'
         osType: 'Linux'
-        storageProfile: 'ManagedDisks'
         type: 'VirtualMachineScaleSets'
         mode: 'System'
         maxPods: 110
@@ -97,7 +96,7 @@ resource kubernetesCluster 'Microsoft.ContainerService/managedClusters@2021-02-0
 }
 
 var NetworkContibutorRole = '4d97b98b-1d4f-4787-a291-c67834d212e7'
-resource clusterNetworkRole 'Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments@2018-09-01-preview' = {
+resource clusterNetworkRole 'Microsoft.Authorization/roleAssignments@2021-04-01-preview' = {
   name: guid(resourceGroup().id, kubernetesCluster.id, kubernetesClusterSubnetName, NetworkContibutorRole)
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', NetworkContibutorRole)
@@ -110,7 +109,7 @@ resource clusterNetworkRole 'Microsoft.Network/virtualNetworks/subnets/providers
   ]
 }
 
-resource aciNetworkRole 'Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments@2018-09-01-preview' = {
+resource aciNetworkRole 'Microsoft.Authorization/roleAssignments@2021-04-01-preview' = {
   name: guid(resourceGroup().id, kubernetesCluster.id, virtualNodesSubnetName, NetworkContibutorRole)
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', NetworkContibutorRole)
