@@ -18,6 +18,6 @@ jobs:
 
       # Lint Bicep file
     - name: Bicep Build
-      uses: Azure/bicep-build-action@v1.0.0
+      uses: Azure/bicep-build-action@v1.0.1
       with:
         bicepFilePath: ./deploy/kubernetes-cluster.bicep
