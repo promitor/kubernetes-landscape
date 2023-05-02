@@ -40,7 +40,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-11-01' = {
   }
 }
 
-resource kubernetesCluster 'Microsoft.ContainerService/managedClusters@2023-01-01' = {
+resource kubernetesCluster 'Microsoft.ContainerService/managedClusters@2023-03-01' = {
   name: 'promitor-kubernetes-landscape-kubernetes-cluster'
   location: location
   tags: {}
