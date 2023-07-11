@@ -1,6 +1,6 @@
 var location = resourceGroup().location
 
-resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-11-01' = {
+resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-02-01' = {
   name: 'promitor-kubernetes-landscape-virtual-network'
   location: location
   tags: {}
